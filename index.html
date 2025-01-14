@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Simulator-Alternative Build</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.min.js"></script>
+    <style>
+        #canvas {
+            border: 1px solid black;
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Albert+Sans&display=swap">
+    <link rel="stylesheet" href="stuff/tooltips.css">
+</head>
+
+<body>
+    <div style="font-family: 'Albert Sans', sans-serif; font-size: 23px; height: 35px; min-height: 33px; max-height: 41px;">
+        <button id="toggleGravity" style="font-family: 'Albert Sans', sans-serif; font-size: 13px; border-radius: 1px; box-shadow: 0px 2px 12px -5px;">Toggle Gravity</button>
+        <button id="addCircle" style="font-family: 'Albert Sans', sans-serif; font-size: 13px; border-radius: 1px; box-shadow: 0px 2px 12px -5px;">Add Circle</button>
+        <button id="addRectangle" style="font-family: 'Albert Sans', sans-serif; font-size: 13px; border-radius: 1px; box-shadow: 0px 2px 12px -5px;">Add Rectangle</button>
+        <button id="clearAll" style="font-family: 'Albert Sans', sans-serif; font-size: 13px; border-radius: 1px; box-shadow: 0px 2px 12px -5px;">Clear All</button>
+        <button id="toggleWireframes" style="font-family: 'Albert Sans', sans-serif; font-size: 13px; border-radius: 1px; box-shadow: 0px 2px 12px -5px;">Toggle Wireframes</button>
+        <button id="toggleWalls" style="font-family: 'Albert Sans', sans-serif; font-size: 13px; border-radius: 1px; box-shadow: 0px 2px 12px -5px;">Toggle Walls</button>
+        <footer style="margin-bottom: 0px; bottom: 0px; margin-top: 610px; padding-top: 0px;">
+            <h6 style="font-family: 'Albert Sans', sans-serif; font-size: 9px; font-weight: 700; border-radius: 0px; padding-bottom: 0px; top: 0px; border-width: 0px; outline: none; text-shadow: 0px 1px 9px;" data-pg-ia='{"l":[{"name":"anim","trg":"mouseenter","t":"this","a":{"l":[{"t":"","l":[{"t":"set","p":0,"d":0,"l":{"skewX":0,"skewY":0},"e":"Elastic.easeIn"},{"t":"tween","p":0,"d":0.111,"l":{"skewX":0,"skewY":0},"e":"Power1.easeOut"},{"t":"tween","p":0.111,"d":0.111,"l":{"skewX":-12.5,"skewY":-12.5},"e":"Power1.easeOut"},{"t":"tween","p":0.222,"d":0.111,"l":{"skewX":6.25,"skewY":6.25},"e":"Power1.easeOut"},{"t":"tween","p":0.333,"d":0.111,"l":{"skewX":-3.125,"skewY":-3.125},"e":"Power1.easeOut"},{"t":"tween","p":0.444,"d":0.111,"l":{"skewX":1.5625,"skewY":1.5625},"e":"Power1.easeOut"},{"t":"tween","p":0.555,"d":0.111,"l":{"skewX":-0.78125,"skewY":-0.78125},"e":"Power1.easeOut"},{"t":"tween","p":0.666,"d":0.111,"l":{"skewX":0.390625,"skewY":0.390625},"e":"Power1.easeOut"},{"t":"tween","p":0.777,"d":0.111,"l":{"skewX":-0.1953125,"skewY":-0.1953125},"e":"Power1.easeOut"},{"t":"tween","p":0.888,"d":0.112,"l":{"skewX":0,"skewY":0},"e":"Cubic.easeIn"},{"t":"tween","p":1,"d":0.5,"l":{"color":"#606060"},"e":"Bounce.easeIn"},{"t":"tween","p":1.74,"d":0.5,"l":{"color":"#000000"},"e":"Expo.easeOut"}]}]},"rpt":"0","d":"2s"}]}'>version 1.0.0</h6>
+            <h6 style="font-family: 'Albert Sans', sans-serif; font-size: 17px; font-weight: 700; border-radius: 0px; padding-bottom: 3px; top: 0px;"></h6>
+        </footer>
+    </div>
+    <script>
+        // Create a new Matter.js engine
+        const engine = Matter.Engine.create();
+        engine.world.gravity.y = 1; // Default gravity
+
+        // Create a renderer
+        const render = Matter.Render.create({
+            element: document.body,
+            engine: engine,
+            options: {
+                width: 800,
+                height: 600,
+                wireframes: false
+            }
+        });
+
+        // Add mouse control
+        const mouse = Matter.Mouse.create(render.canvas);
+        const mouseConstraint = Matter.MouseConstraint.create(engine, {
+            mouse: mouse,
+            constraint: {
+                stiffness: 0.05,
+                render: {
+                    visible: true
+                }
+            }
+        });
+        Matter.World.add(engine.world, mouseConstraint);
+
+        // Keep the mouse in sync with rendering
+        render.mouse = mouse;
+
+        // Run the engine
+        Matter.Engine.run(engine);
+
+        // Run the renderer
+        Matter.Render.run(render);
+
+        // Add event listeners to the buttons
+        document.getElementById("toggleGravity").addEventListener("click", () => {
+            // Toggle gravity
+            engine.world.gravity.y = engine.world.gravity.y === 1 ? 0 : 1;
+        });
+
+        document.getElementById("addCircle").addEventListener("click", () => {
+            // Add a circle
+            const x = Math.random() * 800;
+            const y = Math.random() * 600;
+            const radius = Math.random() * 30 + 10;
+            const circle = Matter.Bodies.circle(x, y, radius, {
+                frictionAir: 0.01,
+                friction: 0.01,
+                render: {
+                    fillStyle: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
+                    strokeStyle: "black",
+                    lineWidth: 1
+                }
+            });
+            Matter.World.add(engine.world, [circle]);
+        });
+
+        document.getElementById("addRectangle").addEventListener("click", () => {
+            // Add a rectangle
+            const x = Math.random() * 800;
+            const y = Math.random() * 600;
+            const width = Math.random() * 50 + 20;
+            const height = Math.random() * 50 + 20;
+            const rectangle = Matter.Bodies.rectangle(x, y, width, height, {
+                frictionAir: 0.01,
+                friction: 0.01,
+                render: {
+                    fillStyle: `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`,
+                    strokeStyle: "black",
+                    lineWidth: 1
+                }
+            });
+            Matter.World.add(engine.world, [rectangle]);
+        });
+
+        document.getElementById("clearAll").addEventListener("click", () => {
+            // Clear all bodies
+            Matter.Composite.clear(engine.world, false);
+        });
+
+        document.getElementById("toggleWireframes").addEventListener("click", () => {
+            // Toggle wireframes
+            render.options.wireframes = !render.options.wireframes;
+        });
+
+        let wallsAdded = false;
+        let walls = [];
+
+        document.getElementById("toggleWalls").addEventListener("click", () => {
+            if (wallsAdded) {
+                // Remove walls
+                Matter.World.remove(engine.world, walls);
+            } else {
+                // Add walls
+                walls = [
+                    Matter.Bodies.rectangle(400, 0, 800, 50, {
+                        isStatic: true
+                    }), // Top
+                    Matter.Bodies.rectangle(400, 600, 800, 50, {
+                        isStatic: true
+                    }), // Bottom
+                    Matter.Bodies.rectangle(0, 300, 50, 600, {
+                        isStatic: true
+                    }), // Left
+                    Matter.Bodies.rectangle(800, 300, 50, 600, {
+                        isStatic: true
+                    }) // Right
+                ];
+                Matter.World.add(engine.world, walls);
+            }
+            wallsAdded = !wallsAdded;
+        });
+    </script>
+    <script src="stuff/pgia.js"></script>
+</body>
+
+</html>
